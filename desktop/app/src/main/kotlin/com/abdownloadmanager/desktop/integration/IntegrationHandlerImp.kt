@@ -10,6 +10,7 @@ import com.abdownloadmanager.integration.DownloadCredentialsFromIntegration
 import com.abdownloadmanager.integration.NewDownloadTask
 import com.abdownloadmanager.integration.ApiQueueModel
 import com.abdownloadmanager.integration.AddDownloadOptionsFromIntegration
+import com.abdownloadmanager.shared.utils.extractors.linkextractor.DownloadRequest
 import ir.amirab.downloader.downloaditem.DownloadCredentials
 import ir.amirab.downloader.downloaditem.DownloadItem
 import ir.amirab.downloader.queue.QueueManager
@@ -28,10 +29,12 @@ class IntegrationHandlerImp : IntegrationHandler, KoinComponent {
     ) {
         appComponent.externalCredentialComingIntoApp(
             list.map {
-                DownloadCredentials(
-                    link = it.link,
-                    headers = it.headers,
-                    downloadPage = it.downloadPage,
+                DownloadRequest(
+                    credentials = DownloadCredentials(
+                        link = it.link,
+                        headers = it.headers,
+                        downloadPage = it.downloadPage,
+                    )
                 )
             },
             options = ImportOptions(

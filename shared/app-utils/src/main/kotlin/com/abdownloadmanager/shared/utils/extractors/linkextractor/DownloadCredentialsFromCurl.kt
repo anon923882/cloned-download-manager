@@ -1,10 +1,9 @@
 package com.abdownloadmanager.shared.utils.extractors.linkextractor
 
 import ir.amirab.downloader.downloaditem.DownloadCredentials
-import com.abdownloadmanager.shared.utils.extractors.Extractor
 
 object DownloadCredentialsFromCurl : DownloadCredentialExtractor<String> {
-    override fun extract(input: String): List<DownloadCredentials> {
+    override fun extract(input: String): List<DownloadRequest> {
         val curlCommands = input.split("\n").filter { it.trim().startsWith("curl") }
         return curlCommands.map { command ->
             val urlRegex = """curl\s+"([^"]+)"""".toRegex()
@@ -21,12 +20,13 @@ object DownloadCredentialsFromCurl : DownloadCredentialExtractor<String> {
             val usernamePasswordMatch = usernamePasswordRegex.find(command)
             val username = usernamePasswordMatch?.groupValues?.get(1)?.trim()
             val password = usernamePasswordMatch?.groupValues?.get(2)?.trim()
-            DownloadCredentials(
+            val credentials = DownloadCredentials(
                 link = url,
                 headers = headers,
                 username = username,
                 password = password
             )
+            DownloadRequest(credentials)
         }
     }
 

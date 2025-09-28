@@ -19,6 +19,7 @@ import com.abdownloadmanager.resources.Res
 import com.abdownloadmanager.shared.utils.*
 import com.abdownloadmanager.shared.utils.FileIconProvider
 import com.abdownloadmanager.shared.utils.extractors.linkextractor.DownloadCredentialFromStringExtractor
+import com.abdownloadmanager.shared.utils.extractors.linkextractor.DownloadRequest
 import com.arkivanov.decompose.ComponentContext
 import ir.amirab.downloader.connection.DownloaderClient
 import ir.amirab.downloader.downloaditem.DownloadCredentials
@@ -45,6 +46,7 @@ import ir.amirab.util.compose.asStringSource
 import ir.amirab.util.compose.asStringSourceWithARgs
 import kotlinx.coroutines.*
 import kotlinx.coroutines.selects.select
+import java.io.File
 
 sealed interface AddSingleDownloadPageEffects {
     data class SuggestUrl(val link: String) : AddSingleDownloadPageEffects
@@ -146,6 +148,14 @@ class AddSingleDownloadComponent(
         downloadChecker.credentials.update { downloadCredentials }
     }
 
+    fun applyDownloadRequest(downloadRequest: DownloadRequest) {
+        setCredentials(downloadRequest.credentials)
+        downloadRequest.suggestedSubfolder?.let { subfolder ->
+            val folderPath = File(appRepository.saveLocation.value, subfolder).absolutePath
+            setFolder(folderPath)
+        }
+    }
+
     fun setFolder(folder: String) {
         downloadChecker.folder.update { folder }
     }
@@ -230,7 +240,7 @@ class AddSingleDownloadComponent(
         val possibleLinks = ClipboardUtil.read() ?: return
         val downloadLinks = DownloadCredentialFromStringExtractor.extract(possibleLinks)
         if (downloadLinks.size == 1) {
-            sendEffect(AddSingleDownloadPageEffects.SuggestUrl(downloadLinks[0].link))
+            sendEffect(AddSingleDownloadPageEffects.SuggestUrl(downloadLinks[0].credentials.link))
         }
     }
 
