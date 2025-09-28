@@ -133,10 +133,13 @@ To compile and test the desktop app on your local machine,
 follow these steps:
 
 1. Clone the project.
-2. Download and extract the [JBR](https://github.com/JetBrains/JetBrainsRuntime/releases), and make it available by either:
-    
+2. Download and extract the [JBR 21 build](https://github.com/JetBrains/JetBrainsRuntime/releases) (or any other JDK 21
+   distribution), and make it available by either:
+
     - Adding it to your `PATH`, or
     - Setting the `JAVA_HOME` environment variable to its installation path.
+
+   Gradle relies on this locally installed toolchain; it will not attempt to download a JDK automatically.
   
 3. Navigate to the project directory, open your terminal and execute the following command:
 

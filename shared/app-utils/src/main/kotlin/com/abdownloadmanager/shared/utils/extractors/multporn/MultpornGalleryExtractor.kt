@@ -16,7 +16,10 @@ object MultpornGalleryExtractor {
         val imageUrls: List<String>,
     )
 
-    private val galleryUrlRegex = Regex("""^https?://(?:www\.)?multporn\.net/comics/[^#?]+""", RegexOption.IGNORE_CASE)
+    private val galleryUrlRegex = Regex(
+        pattern = """^https?://(?:www\.)?multporn\.net/comics/[^#?]+(?:\?[^#]*)?$""",
+        options = setOf(RegexOption.IGNORE_CASE),
+    )
     private val titleRegex = Regex(
         pattern = """<h1[^>]*id=[\"']page-title[\"'][^>]*>(.*?)</h1>""",
         options = setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL),
@@ -28,10 +31,15 @@ object MultpornGalleryExtractor {
     private val styledPathRegex = Regex("""/styles/[^/]+/public""", RegexOption.IGNORE_CASE)
 
     fun extract(url: String): GalleryInfo? {
-        if (!galleryUrlRegex.containsMatchIn(url)) {
+        val normalizedUrl = url.trim()
+        if (!galleryUrlRegex.matches(normalizedUrl)) {
             return null
         }
-        val html = fetch(url) ?: return null
+        val html = fetch(normalizedUrl) ?: return null
+        return parseGalleryDocument(html)
+    }
+
+    internal fun parseGalleryDocument(html: String): GalleryInfo? {
         val rawTitle = titleRegex.find(html)?.groupValues?.getOrNull(1)?.let(::cleanTitle)?.takeIf { it.isNotBlank() }
             ?: return null
         val folderName = sanitizeFolderName(rawTitle)

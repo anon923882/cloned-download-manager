@@ -4,9 +4,9 @@ pluginManagement {
     }
 }
 
-plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
-}
+// See root settings.gradle.kts for why the Foojay resolver plugin is not
+// applied. Composite builds inherit the toolchain configuration from the
+// main project, so relying on the local JDK keeps behaviour consistent.
 
 dependencyResolutionManagement{
     versionCatalogs {

@@ -13,6 +13,9 @@ interface DownloadCredentialExtractor<T> : Extractor<T, List<DownloadRequest>> {
 object DownloadCredentialFromStringExtractor : DownloadCredentialExtractor<String> {
     override fun extract(input: String): List<DownloadRequest> {
         return StringUrlExtractor.extract(input)
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .distinct()
             .flatMap { link ->
                 val gallery = MultpornGalleryExtractor.extract(link)
                 if (gallery != null) {
