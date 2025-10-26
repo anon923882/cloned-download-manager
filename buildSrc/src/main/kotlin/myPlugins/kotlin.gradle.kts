@@ -1,5 +1,7 @@
 package myPlugins
 
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     kotlin("jvm")
 }
@@ -20,7 +22,11 @@ fun getFeatures(): Set<String> = setOf(
 )
 
 kotlin {
+    jvmToolchain(21)
+
     compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_21)
+
         val optIns = getOptIns().map { "-Xopt-in=$it" }
         val features = getFeatures().map { "-X$it" }
         freeCompilerArgs.set(optIns + features)

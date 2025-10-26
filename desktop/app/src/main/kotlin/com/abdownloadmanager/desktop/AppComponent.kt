@@ -49,6 +49,7 @@ import com.abdownloadmanager.resources.*
 import com.abdownloadmanager.shared.utils.BaseComponent
 import com.abdownloadmanager.shared.utils.DownloadItemOpener
 import com.abdownloadmanager.shared.utils.DownloadSystem
+import com.abdownloadmanager.shared.utils.extractors.linkextractor.DownloadRequest
 import com.abdownloadmanager.shared.utils.category.CategoryManager
 import com.abdownloadmanager.shared.utils.category.CategorySelectionMode
 import com.abdownloadmanager.shared.utils.perhostsettings.PerHostSettingsManager
@@ -191,9 +192,11 @@ class AppComponent(
                 ctx = componentContext,
                 onClose = this::closeBatchDownload,
                 importLinks = {
-                    openAddDownloadDialog(it.map {
-                        DownloadCredentials(
-                            link = it
+                    openAddDownloadDialog(it.map { url ->
+                        DownloadRequest(
+                            credentials = DownloadCredentials(
+                                link = url
+                            )
                         )
                     })
                 }
@@ -329,7 +332,7 @@ class AppComponent(
                         id = config.id,
                         importOptions = config.importOptions
                     ).also {
-                        it.setCredentials(config.credentials)
+                        it.applyDownloadRequest(config.request)
                     }
                 }
 
@@ -667,12 +670,12 @@ class AppComponent(
     }
 
     fun externalCredentialComingIntoApp(
-        list: List<DownloadCredentials>,
+        list: List<DownloadRequest>,
         options: ImportOptions
     ) {
         val editDownloadComponent = editDownloadSlot.value.child?.instance
         if (editDownloadComponent != null) {
-            list.firstOrNull()?.let {
+            list.firstOrNull()?.credentials?.let {
                 editDownloadComponent.importCredential(it)
                 editDownloadComponent.bringToFront()
             }
@@ -682,12 +685,12 @@ class AppComponent(
     }
 
     override fun openAddDownloadDialog(
-        links: List<DownloadCredentials>,
+        links: List<DownloadRequest>,
         importOptions: ImportOptions,
     ) {
         scope.launch {
             //remove duplicates
-            val links = links.distinct()
+            val links = links.distinctBy { it.credentials.link }
             addDownloadPageControl.navigate {
                 val newItems = it.items +
                         if (links.size > 1) {
@@ -697,7 +700,7 @@ class AppComponent(
                             )
                         } else {
                             AddDownloadConfig.SingleAddConfig(
-                                links.firstOrNull() ?: DownloadCredentials.empty(),
+                                links.firstOrNull() ?: DownloadRequest(DownloadCredentials.empty()),
                                 importOptions,
                             )
                         }
@@ -1075,7 +1078,7 @@ interface EditDownloadDialogManager {
 interface AddDownloadDialogManager {
     val openedAddDownloadDialogs: StateFlow<List<AddDownloadComponent>>
     fun openAddDownloadDialog(
-        links: List<DownloadCredentials>,
+        links: List<DownloadRequest>,
         importOptions: ImportOptions = ImportOptions(),
     )
 

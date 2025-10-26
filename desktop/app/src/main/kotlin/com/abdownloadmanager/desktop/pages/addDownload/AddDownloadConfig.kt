@@ -3,6 +3,7 @@ package com.abdownloadmanager.desktop.pages.addDownload
 import com.abdownloadmanager.desktop.storage.PageStatesStorage
 import com.abdownloadmanager.shared.utils.BaseComponent
 import com.arkivanov.decompose.ComponentContext
+import com.abdownloadmanager.shared.utils.extractors.linkextractor.DownloadRequest
 import ir.amirab.downloader.downloaditem.DownloadCredentials
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -51,13 +52,13 @@ interface AddDownloadConfig {
     val importOptions: ImportOptions
 
     data class SingleAddConfig(
-        val credentials: DownloadCredentials = DownloadCredentials.empty(),
+        val request: DownloadRequest = DownloadRequest(DownloadCredentials.empty()),
         override val importOptions: ImportOptions = ImportOptions(),
         override val id: String = UUID.randomUUID().toString(),
     ) : AddDownloadConfig
 
     data class MultipleAddConfig(
-        val links: List<DownloadCredentials> = emptyList(),
+        val links: List<DownloadRequest> = emptyList(),
         override val importOptions: ImportOptions = ImportOptions(),
         override val id: String = UUID.randomUUID().toString(),
     ) : AddDownloadConfig

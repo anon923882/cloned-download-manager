@@ -1,9 +1,10 @@
 pluginManagement {
 }
 
-plugins{
-//    id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
-}
+// The build relies on locally provisioned toolchains (for example JBR 21).
+// We avoid applying the Foojay resolver convention plugin because the
+// currently released versions trigger NoSuchFieldError when used together
+// with Gradle 9.x on Windows.
 
 dependencyResolutionManagement {
     repositories {

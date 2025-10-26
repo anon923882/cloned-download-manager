@@ -41,6 +41,7 @@ import ir.amirab.util.flow.mapStateFlow
 import ir.amirab.util.flow.mapTwoWayStateFlow
 import com.abdownloadmanager.shared.utils.extractors.linkextractor.DownloadCredentialFromStringExtractor
 import com.abdownloadmanager.shared.utils.extractors.linkextractor.DownloadCredentialsFromCurl
+import com.abdownloadmanager.shared.utils.extractors.linkextractor.DownloadRequest
 import ir.amirab.downloader.DownloadManagerEvents
 import ir.amirab.downloader.db.QueueModel
 import ir.amirab.downloader.downloaditem.contexts.RemovedBy
@@ -729,7 +730,7 @@ class HomeComponent(
 
 
     fun requestAddNewDownload(
-        link: List<DownloadCredentials> = listOf(DownloadCredentials.empty()),
+        link: List<DownloadRequest> = listOf(DownloadRequest(DownloadCredentials.empty())),
     ) {
         addDownloadDialogManager.openAddDownloadDialog(link)
     }
@@ -916,7 +917,7 @@ class HomeComponent(
         this.filterState.queueFilter = queueModel
     }
 
-    fun importLinks(links: List<DownloadCredentials>) {
+    fun importLinks(links: List<DownloadRequest>) {
         val size = links.size
         when {
             size <= 0 -> {
@@ -929,12 +930,12 @@ class HomeComponent(
         }
     }
 
-    val currentActiveDrops: MutableStateFlow<List<DownloadCredentials>?> = MutableStateFlow(null)
+    val currentActiveDrops: MutableStateFlow<List<DownloadRequest>?> = MutableStateFlow(null)
 
 
-    private fun parseLinks(v: String): List<DownloadCredentials> {
+    private fun parseLinks(v: String): List<DownloadRequest> {
         return DownloadCredentialFromStringExtractor.extract(v)
-            .distinctBy { it.link }
+            .distinctBy { it.credentials.link }
     }
 
     fun onExternalTextDraggedIn(readText: () -> String) {

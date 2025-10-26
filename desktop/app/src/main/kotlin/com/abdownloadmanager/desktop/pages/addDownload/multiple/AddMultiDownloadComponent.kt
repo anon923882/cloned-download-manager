@@ -14,6 +14,7 @@ import com.abdownloadmanager.shared.utils.category.Category
 import com.abdownloadmanager.shared.utils.category.CategoryItem
 import com.abdownloadmanager.shared.utils.category.CategoryManager
 import com.abdownloadmanager.shared.utils.category.CategorySelectionMode
+import com.abdownloadmanager.shared.utils.extractors.linkextractor.DownloadRequest
 import com.abdownloadmanager.shared.utils.perhostsettings.PerHostSettingsManager
 import com.abdownloadmanager.shared.utils.perhostsettings.applyToHttpDownload
 import com.abdownloadmanager.shared.utils.perhostsettings.getSettingsForURL
@@ -28,6 +29,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import java.io.File
 
 class AddMultiDownloadComponent(
     ctx: ComponentContext,
@@ -100,13 +102,19 @@ class AddMultiDownloadComponent(
         scope = scope,
     )
 
-    fun addItems(list: List<DownloadCredentials>) {
-        val newItemsToAdd = list.filter {
-            it !in this.list.map {
-                it.credentials.value
+    fun addItems(list: List<DownloadRequest>) {
+        val existingLinks = this.list.map { it.credentials.value.link }.toSet()
+        val uniqueRequests = list
+            .distinctBy { it.credentials.link }
+            .filter { it.credentials.link !in existingLinks }
+
+        val newItemsToAdd = uniqueRequests.map { request ->
+            val checker = newChecker(request.credentials.withAppliedDefaultHostSettings())
+            request.suggestedSubfolder?.let { subfolder ->
+                val folderPath = File(folder.value, subfolder).absolutePath
+                checker.folder.value = folderPath
             }
-        }.map {
-            newChecker(it.withAppliedDefaultHostSettings())
+            checker
         }
         enqueueCheck(newItemsToAdd)
         this.list = this.list.plus(newItemsToAdd)

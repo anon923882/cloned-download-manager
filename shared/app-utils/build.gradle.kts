@@ -26,4 +26,10 @@ dependencies {
 
     //because we don't have material design, but we use ripple effect
     implementation(libs.compose.material.rippleEffect)
+
+    testImplementation(kotlin("test"))
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
